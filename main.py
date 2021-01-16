@@ -1,5 +1,6 @@
 # Standard
 import os
+import time
 
 # Third-party
 from kinesis.consumer import KinesisConsumer
@@ -99,6 +100,22 @@ def everybody_in_video_is_authorized():
             log_access_attempt_to_db(users, RESOURCE_ID, False)
             return False
 
+def is_locked():
+    # Checks if door is shut (locked)
+    # TODO: replace this with real interface for lock
+    try:
+        time.sleep(1)
+        return False
+    except KeyboardInterrupt:
+        return True
+
+def door_handler(resource_id):
+    while True:
+        if is_locked():
+            break
+
+    log_resource_close_to_db(resource_id)
+
 def getenv(var_name):
     # Get the value of an environment variable
     val = os.getenv(var_name)
@@ -117,5 +134,6 @@ if __name__ == "__main__":
     print("Attempting to authorize...")
     if everybody_in_video_is_authorized():
         print('AUTHORIZED: you may enter the data center')
+        door_handler(RESOURCE_ID)
     else:
         print('UNAUTHORIZED: Access Denied')

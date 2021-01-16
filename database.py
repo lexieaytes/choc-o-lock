@@ -87,6 +87,11 @@ def log_access_attempt_to_db(users_on_screen, resource_id, authorized):
     print('------------------------------------')
 
 # TODO: connect to real database
+def log_resource_close_to_db(resource_id):
+    # This logs that the resource is closed (locked)
+    print(f'Resource Closed: {resource_id}')
+
+# TODO: connect to real database
 def add_user_to_db(first_name, last_name):
     # This should take in any values needed to create a new user for the database
     # And return a newly created User object
