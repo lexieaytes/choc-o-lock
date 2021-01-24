@@ -92,6 +92,11 @@ def log_resource_close_to_db(resource_id):
     print(f'Resource Closed: {resource_id}')
 
 # TODO: connect to real database
+def log_resource_time_out_to_db(resource_id):
+    # This logs that the resource has been open for more than the predetermined time
+    print(f'Resource Timed Out: {resource_id}')
+
+# TODO: connect to real database
 def add_user_to_db(first_name, last_name):
     # This should take in any values needed to create a new user for the database
     # And return a newly created User object

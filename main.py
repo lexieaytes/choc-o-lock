@@ -11,6 +11,7 @@ from face_utils import *
 
 TIMEOUT = 10
 AUTH_THRESHOLD = 5
+MAX_OPEN_TIME = 10
 
 RESOURCE_ID = None
 AWS_STREAM_NAME = None
@@ -100,20 +101,24 @@ def everybody_in_video_is_authorized():
             log_access_attempt_to_db(users, RESOURCE_ID, False)
             return False
 
-def is_locked():
+def timer(resource_id):
+    start_time = time.time()
+    while is_unlocked():
+        if (time.time() -  start_time) > MAX_OPEN_TIME:
+            log_resource_time_out_to_db(resource_id)
+            start_time = time.time()
+
+def is_unlocked():
     # Checks if door is shut (locked)
     # TODO: replace this with real interface for lock
     try:
         time.sleep(1)
-        return False
-    except KeyboardInterrupt:
         return True
+    except KeyboardInterrupt:
+        return False
 
 def door_handler(resource_id):
-    while True:
-        if is_locked():
-            break
-
+    timer(resource_id)
     log_resource_close_to_db(resource_id)
 
 def getenv(var_name):
