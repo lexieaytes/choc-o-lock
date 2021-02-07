@@ -108,6 +108,7 @@ def access_handler(db, resource_id, stream_name):
                 db.log_new_users_appearance(new_users, resource_id, authorized)
                 curr_users |= new_users 
         elif not unattended:
+            # Now it is unattended, since we didn't see anyone on camera
             print('UNATTENDED!!!')
             unattended = True  
             start_time = time.time()  # start timer
@@ -121,7 +122,7 @@ def access_handler(db, resource_id, stream_name):
 def getenv(var_name):
     # Get the value of an environment variable
     val = os.getenv(var_name)
-    if not val:
+    if val is None:
         raise ValueError(f"environment variable '{var_name}' not set")
     return val
 
