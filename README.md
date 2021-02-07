@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/github/lexieaytes/choc-o-lock/badge.svg?branch=master)](https://coveralls.io/github/lexieaytes/choc-o-lock?branch=master)
+
 # Choc-O-Lock
 *"Sweeten up your security"*
 
