@@ -24,7 +24,8 @@ Unknown = User('Unknown', '', '')
 mock_user_table = {
     # UUID/user_id : User
     '3d2cf3ab-3beb-43e2-8065-86d4e0f99035': User('Tony', 'Stark', '3d2cf3ab-3beb-43e2-8065-86d4e0f99035'),
-    '831a6f82-3e4b-4e84-98f7-bc116b77e822': User('Arya', 'Stark', '831a6f82-3e4b-4e84-98f7-bc116b77e822')
+    '831a6f82-3e4b-4e84-98f7-bc116b77e822': User('Arya', 'Stark', '831a6f82-3e4b-4e84-98f7-bc116b77e822'),
+    '589ae695-36de-4993-8470-e142cf111c6a': User('Robb', 'Stark', '589ae695-36de-4993-8470-e142cf111c6a')
 }
 
 mock_resource_table = {
@@ -40,22 +41,23 @@ mock_auth_table = [
     ('831a6f82-3e4b-4e84-98f7-bc116b77e822', '1'),
     ('831a6f82-3e4b-4e84-98f7-bc116b77e822', '2'),
     ('3d2cf3ab-3beb-43e2-8065-86d4e0f99035', '1'),
-    ('3d2cf3ab-3beb-43e2-8065-86d4e0f99035', '3')
+    ('3d2cf3ab-3beb-43e2-8065-86d4e0f99035', '3'),
+    ('589ae695-36de-4993-8470-e142cf111c6a', '1')
 ]
 
 
 class DBClient:
 
     def __init__(self):
-        # Initialization code goes here
+        # TODO Initialization code goes here
         pass
 
     def __enter__(self):
-        # Database connection code goes here
+        # TODO Database connection code goes here
         return self
 
     def __exit__(self, type, value, traceback):
-        # Database closing code goes here
+        # TODO Database closing code goes here
         pass
 
     def add_user(self, first_name, last_name):
