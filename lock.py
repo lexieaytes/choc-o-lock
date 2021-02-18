@@ -1,8 +1,8 @@
-# TODO connect to the real lock
+# TODO integrate with the real lock
 def unlock():
     print('Unlocking...')
 
-# TODO connect to the real lock
+# TODO integrate with the real lock
 def resource_is_unlocked():
     # Return True if the resource is unlocked
     # and False otherwise

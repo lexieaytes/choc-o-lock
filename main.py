@@ -1,4 +1,5 @@
 # Standard
+from collections import defaultdict
 import os
 import time
 
@@ -54,68 +55,90 @@ def log_auth_attempt(timeout, auth_count, num_faces):
     print('Auth count:', auth_count)
     print('Num faces:', num_faces)
 
-def everybody_in_video_is_authorized(db, resource_id, aws_stream_name):
-    timeout = TIMEOUT
-    auth_count = 0
+class AuthToken:
+
+    def __init__(self, db, resource_id):
+        self.db = db 
+        self.resource_id = resource_id
+        self.timeout = TIMEOUT
+        self.result = False
+        self.done = False
+        self.count = 0
+
+    def reset(self):
+        self.timeout = TIMEOUT
+        self.count = 0
+
+    def check(self, users):
+        if users_are_authorized(self.db, users, self.resource_id):
+            self.count += 1
+            if self.count >= AUTH_THRESHOLD:
+                self.result = True  # successful authorization
+                self.done = True  
+                
+        self.timeout -= 1  # consumed 1 chance to authenticate
+
+        if self.timeout == 0:
+            self.done = True  # timed out
+
+def everybody_in_video_is_authorized(db, kc, resource_id):
+    token = AuthToken(db, resource_id)
     num_faces = 0
 
-    kc = Consumer(aws_stream_name)
-
-    while timeout > 0:
+    while not token.done:
         faces = kc.get_faces_in_video()
 
         if num_faces != len(faces):
             # There's been a change in the number of people on screen
-            timeout = TIMEOUT  # reset timeout
-            auth_count = 0
+            token.reset()
             num_faces = len(faces)
 
-        log_auth_attempt(timeout, auth_count, num_faces)
+        log_auth_attempt(token.timeout, token.count, num_faces)
 
         users = get_users_from_faces(db, faces)
 
-        if users_are_authorized(db, users, resource_id):
-            auth_count += 1
-        else:
-            auth_count = 0
+        token.check(users)
+            
+    db.log_access_attempt(users, resource_id, token.result)
+    return token.result
 
-        if auth_count > AUTH_THRESHOLD:
-            db.log_access_attempt(users, resource_id, True)
-            return True
-
-        timeout -= 1  # consumed 1 chance to authenticate
-
-    db.log_access_attempt(users, resource_id, False)
-    return False
-
-def access_handler(db, resource_id, stream_name):
-    kc = Consumer(aws_stream_name)
-
+def access_handler(db, kc, resource_id):
     faces = kc.get_faces_in_video()
-    curr_users = set(get_users_from_faces(db, faces))
+    initial_users = set(get_users_from_faces(db, faces))
     unattended = False
+    unattended_count = 0
+    new_user_appearances = defaultdict(int)
+    NEW_USER_APPEARANCE_THRESHOLD = 5
 
     while resource_is_unlocked():
         faces = kc.get_faces_in_video()
 
         if faces:
             unattended = False
-            new_users = set(get_users_from_faces(db, faces))
-            new_users = new_users - curr_users
-            if new_users:
-                # Someone new has joined the party
-                authorized = users_are_authorized(db, new_users, resource_id)
-                db.log_new_users_appearance(new_users, resource_id, authorized)
-                curr_users |= new_users 
-        elif not unattended:
+            unattended_count = 0
+            new_users = set(get_users_from_faces(db, faces)) - initial_users
+            for user in new_users:
+                new_user_appearances[user] += 1
+                if new_user_appearances[user] == NEW_USER_APPEARANCE_THRESHOLD:
+                    # We can say with confidence that someone new has joined the party
+                    # TODO make this singular
+                    authorized = users_are_authorized(db, new_users, resource_id)
+                    db.log_new_users_appearance(new_users, resource_id, authorized)
+
+        elif unattended:
+            if (time.time() -  start_time) > MAX_OPEN_TIME:
+                # Left unattended for too long, send alert
+                db.log_resource_time_out(resource_id)
+                start_time = time.time()  # restart timer
+        elif unattended_count > 5:
             # Now it is unattended, since we didn't see anyone on camera
             print('UNATTENDED!!!')
             unattended = True  
             start_time = time.time()  # start timer
-        elif (time.time() -  start_time) > MAX_OPEN_TIME:
-            # Left unattended for too long, send alert
-            db.log_resource_time_out(resource_id)
-            start_time = time.time()  # restart timer
+        else:
+            print("increment unattended count")
+            unattended_count += 1
+    
 
     db.log_resource_close(resource_id)
 
@@ -127,18 +150,26 @@ def getenv(var_name):
     return val
 
 
-if __name__ == "__main__":
+def run_main_auth_routine():
     resource_id = getenv('CHOC_O_LOCK_RESOURCE_ID')
     aws_stream_name = getenv('AWS_VIDEO_STREAM_NAME')
 
     print("Application starting...")
+    print("Connecting to AWS...")
+
+    kc = Consumer(aws_stream_name)
+
     print('Connecting to database...')
 
     with DBClient() as db:
         print("Attempting to authorize...")
-        if everybody_in_video_is_authorized(db, resource_id, aws_stream_name):
+        if everybody_in_video_is_authorized(db, kc, resource_id):
             print('AUTHORIZED: you may enter the data center')
             unlock()
-            access_handler(db, resource_id, aws_stream_name)
+            access_handler(db, kc, resource_id)
         else:
             print('UNAUTHORIZED: Access Denied')
+
+
+if __name__ == "__main__":
+    run_main_auth_routine()
