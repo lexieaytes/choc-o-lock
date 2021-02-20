@@ -1,17 +1,14 @@
-# Standard
-from collections import defaultdict
 import os
 import time
 
-# Local
 from aws_consumer import *
 from database import *
 from lock import *
 
 TIMEOUT = 10
 AUTH_THRESHOLD = 4
-TIME_TO_BE_CONSIDERED_UNATTENDED = 10  # seconds
-UNKNOWN_USER_THRESHOLD = 4
+UNKNOWN_USER_THRESHOLD = 6
+TIME_UNTIL_UNATTENDED_ALERT = 10  # seconds
 
 
 def get_user_from_face(db, face):
@@ -114,7 +111,7 @@ class Timer:
 
     @property
     def is_expired(self):
-        return self.start_time and time.time() - self.start_time > self.time_interval
+        return bool(self.start_time) and time.time() - self.start_time > self.time_interval
 
 class AccessToken:
 
@@ -124,17 +121,19 @@ class AccessToken:
         self.curr_users = set(initial_users)
         self.unknown_count = 0
         self.unattended = False
-        self.unattended_timer = Timer(TIME_TO_BE_CONSIDERED_UNATTENDED)
+        self.unattended_timer = Timer(TIME_UNTIL_UNATTENDED_ALERT)
 
     def check(self, users):
         if users:
             self.unattended = False
             self.verify(users)
         elif not self.unattended:
+            # Now we are unattended (at least for a moment)
             print('nobody on screen')
             self.unattended = True
             self.unattended_timer.start()
         elif self.unattended_timer.is_expired:
+            # We've been unattended for too long
             print('!!! UNATTENDED ALERT !!!')
             self.db.log_resource_time_out(self.resource_id)
             self.unattended_timer.start()  # restart timer
@@ -186,7 +185,6 @@ def run_main_auth_routine():
     resource_id = getenv('CHOC_O_LOCK_RESOURCE_ID')
     aws_stream_name = getenv('AWS_VIDEO_STREAM_NAME')
 
-    print("Application starting...")
     print("Connecting to AWS...")
 
     kc = Consumer(aws_stream_name)
