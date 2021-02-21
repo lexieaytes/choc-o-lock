@@ -2,6 +2,7 @@ import logging
 import pyodbc
 
 from datetime import datetime, timezone
+import logging
 from uuid import uuid4
 
 from classes import Resource, Unknown, User
@@ -91,7 +92,7 @@ class DBClient:
 
     def log_access_attempt(self, users, resource_id, authorized):
         # :param users          list of User objects
-        # :param resource_id    integer representing the resource Id in the database
+        # :param resource_id    string representing the resource Id in the database
         # :param authorized     True or False if all users are authorized
         #
         # Some general database ideas:
