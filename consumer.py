@@ -1,6 +1,10 @@
+import logging
+
 from kinesis.consumer import KinesisConsumer
 
-from classes import Unknown
+from classes import Unknown 
+
+logger = logging.getLogger('choco')
 
 
 def get_user_from_face(db, face):
@@ -13,7 +17,8 @@ def get_user_from_face(db, face):
         top_match = matched_faces[0]
         user_id = top_match['Face']['ExternalImageId']
         user = db.get_user(user_id)
-        print(f'Recognized: {user.first_name} {user.last_name} | Similarity: {top_match["Similarity"]}')
+        logger.debug(f'Recognized: {user.first_name} {user.last_name}') 
+        logger.debug(f'Similarity: {top_match["Similarity"]}')
         return user
 
 

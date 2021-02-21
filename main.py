@@ -1,3 +1,5 @@
+import argparse
+import logging
 import os
 
 from access import AccessToken
@@ -11,7 +13,19 @@ TIMEOUT = 10
 AUTH_THRESHOLD = 4
 TIME_UNTIL_UNATTENDED_ALERT = 10  # seconds
 UNKNOWN_USER_THRESHOLD = 6
- 
+
+logger = logging.getLogger('choco')
+
+s_handler = logging.StreamHandler()
+f_handler = logging.FileHandler('log.log')
+
+fmt = logging.Formatter('%(asctime)s: %(levelname)s: %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+s_handler.setFormatter(fmt)
+f_handler.setFormatter(fmt)
+
+logger.addHandler(s_handler)
+logger.addHandler(f_handler)
+
 
 def auth_handler(db, kc, resource_id):
     token = AuthToken(db, resource_id, TIMEOUT, AUTH_THRESHOLD)
@@ -29,10 +43,10 @@ def auth_handler(db, kc, resource_id):
         print('UNAUTHORIZED: Access Denied')
 
 
-def access_handler(db, kc, resource_id, initial_users):
+def access_handler(db, kc, resource_id, users):
     unlock()
 
-    token = AccessToken(db, resource_id, initial_users, 
+    token = AccessToken(db, resource_id, users, 
                         TIME_UNTIL_UNATTENDED_ALERT, UNKNOWN_USER_THRESHOLD)
 
     while resource_is_unlocked():
@@ -40,20 +54,10 @@ def access_handler(db, kc, resource_id, initial_users):
         token.check(users)
 
     db.log_resource_close(users, resource_id)
+    print('Resource Closed')
 
 
-def getenv(var_name):
-    # Get the value of an environment variable
-    val = os.getenv(var_name)
-    if val is None:
-        raise ValueError(f"environment variable '{var_name}' not set")
-    return val
-
-
-def main():
-    resource_id = getenv('CHOC_O_LOCK_RESOURCE_ID')
-    aws_stream_name = getenv('AWS_VIDEO_STREAM_NAME')
-
+def main(resource_id, aws_stream_name):
     print("Connecting to AWS...")
 
     kc = Consumer(aws_stream_name)
@@ -66,4 +70,13 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description='Choc-o-Lock Security System')
+    parser.add_argument('--resource-id', required=True, help='Id of the resource to protect')
+    parser.add_argument('--aws-stream', required=True, help='Name of the AWS Kinesis Video Stream to monitor')
+    parser.add_argument('--debug', action='store_true', help='Run in DEBUG mode')
+    args = parser.parse_args()
+
+    if args.debug:
+        logger.setLevel(logging.DEBUG)
+
+    main(args.resource_id, args.aws_stream)

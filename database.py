@@ -1,7 +1,10 @@
 from datetime import datetime, timezone
+import logging
 from uuid import uuid4
 
 from classes import Resource, Unknown, User
+
+logger = logging.getLogger('choco')
 
 
 # *****************************
@@ -94,38 +97,35 @@ class DBClient:
         #
         unknown_user_count = len([user for user in users if user is Unknown])
         recognized_users = [user.id for user in users if user is not Unknown]
-        print('-------- ACCESS ATTEMPT --------')
-        print(f'Time: {datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")}')
-        print(f'Authorized: {authorized}')
-        print(f'Resource Id: {resource_id}')
-        print(f'Unknown Users: {unknown_user_count}')
-        print(f'Recognized Users: {" ".join(recognized_users)}')
-        print('--------------------------------')
+        logger.debug('-------- ACCESS ATTEMPT --------')
+        logger.debug(f'Authorized: {authorized}')
+        logger.debug(f'Resource Id: {resource_id}')
+        logger.debug(f'Unknown Users: {unknown_user_count}')
+        logger.debug(f'Recognized Users: {" ".join(recognized_users)}')
+        logger.debug('--------------------------------')
 
-    def log_resource_close(self, resource_id):
+    def log_resource_close(self, users, resource_id):
         unknown_user_count = len([user for user in users if user is Unknown])
         recognized_users = [user.id for user in users if user is not Unknown]
-        print('-------- RESOURCE CLOSED --------')
-        print(f'Time: {datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")}')
-        print(f'Resource Id: {resource_id}')
-        print(f'Unknown Users: {unknown_user_count}')
-        print(f'Recognized Users: {" ".join(recognized_users)}')
-        print('--------------------------------')
+        logger.debug('-------- RESOURCE CLOSED --------')
+        logger.debug(f'Resource Id: {resource_id}')
+        logger.debug(f'Unknown Users: {unknown_user_count}')
+        logger.debug(f'Recognized Users: {" ".join(recognized_users)}')
+        logger.debug('--------------------------------')
 
     def log_resource_time_out(self, resource_id):
-        print(f'Resource Timed Out: {resource_id}')
+        logger.warning('!!! UNATTENDED ALERT !!!')
+        logger.warning(f'Resource Timed Out: {resource_id}')
 
     def log_new_user_appearance(self, user, resource_id, authorized):
-        print('-------- NEW APPEARANCE --------')
-        print(f'Time: {datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")}')
-        print(f'Authorized: {authorized}')
-        print(f'Resource Id: {resource_id}')
-        print(f'Recognized User: {user.first_name} {user.last_name} {user.id}')
-        print('--------------------------------')
+        logger.warning('-------- NEW APPEARANCE --------')
+        logger.warning(f'Authorized: {authorized}')
+        logger.warning(f'Resource Id: {resource_id}')
+        logger.warning(f'Recognized User: {user.first_name} {user.last_name} {user.id}')
+        logger.warning('--------------------------------')
 
     def log_unknown_user_appearance(self, num_unknown_users, resource_id):
-        print('-------- UNKNOWN USER APPEARANCE --------')
-        print(f'Time: {datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")}')
-        print(f'Resource Id: {resource_id}')
-        print(f'Count: {num_unknown_users}')
-        print('-----------------------------------------')
+        logger.warning('-------- UNKNOWN USER APPEARANCE --------')
+        logger.warning(f'Resource Id: {resource_id}')
+        logger.warning(f'Count: {num_unknown_users}')
+        logger.warning('-----------------------------------------')

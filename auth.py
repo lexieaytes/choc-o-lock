@@ -1,16 +1,20 @@
+import logging
+
 from classes import Unknown
+
+logger = logging.getLogger('choco')
 
 
 def log_auth_attempt(timeout, auth_count, num_users):
-    print('-----------------------------')
-    print('Timeout:', timeout)
-    print('Auth count:', auth_count)
-    print('Num users:', num_users)
+    logger.debug('-----------------------------')
+    logger.debug(f'Timeout: {timeout}')
+    logger.debug(f'Auth count: {auth_count}')
+    logger.debug(f'Num users: {num_users}')
 
 
 def user_is_authorized(db, user, resource_id):
     if user is Unknown:
-        print('Unknown user detected')
+        logger.warning('Unknown user detected')
         return False
 
     return db.user_has_access_to_resource(user.id, resource_id)
@@ -18,7 +22,7 @@ def user_is_authorized(db, user, resource_id):
 
 def users_are_authorized(db, users, resource_id):
     if not users:
-        print('Nobody detected')
+        logger.debug('Nobody detected')
         return False
 
     for user in users:

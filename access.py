@@ -1,7 +1,11 @@
+import logging
 import time
 
 from auth import user_is_authorized
 from classes import Unknown
+
+logger = logging.getLogger('choco')
+
 
 class Timer:
 
@@ -34,16 +38,15 @@ class AccessToken:
             self.verify(users)
         elif not self.unattended:
             # Now we are unattended (at least for a moment)
-            print('nobody on screen')
+            logger.debug('Nobody on screen')
             self.unattended = True
             self.unattended_timer.start()
         elif self.unattended_timer.is_expired:
             # We've been unattended for too long
-            print('!!! UNATTENDED ALERT !!!')
             self.db.log_resource_time_out(self.resource_id)
             self.unattended_timer.start()  # restart timer
         else:
-            print('still unattended')
+            logger.debug('Still unattended')
 
     def verify(self, users):
         new_users = set(users) - self.curr_users
@@ -58,8 +61,8 @@ class AccessToken:
                 self.db.log_new_user_appearance(user, self.resource_id, authorized)
                 self.curr_users.add(user)
     
-        print('Unknown users:', num_unknown_users)
-        print('Count:', self.unknown_count)
+        logger.debug(f'Unknown users: {num_unknown_users}')
+        logger.debug(f'Count: {self.unknown_count}')
 
         if num_unknown_users:
             self.unknown_count += 1
