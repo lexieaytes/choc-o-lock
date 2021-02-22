@@ -2,7 +2,6 @@ import logging
 import pyodbc
 
 from datetime import datetime, timezone
-from uuid import uuid4
 
 from classes import Resource, Unknown, User
 
@@ -60,17 +59,11 @@ class DBClient:
         self.conn.close()
 
     def add_user(self, first_name, last_name):
-        # We'll need to generate a User Id (UUID) to be the primary key for each new user
-        # That should be done by the database (example format above in mock database)
-        # We can reuse the same UUID for AWS Rekognition
-        new_user_id = str(uuid4())
+        sql = """INSERT INTO SeniorDesign.dbo.employee(employeeFirstName, employeeLastName)
+                 VALUES (?, ?)"""
 
-        sql = """INSERT INTO SeniorDesign.dbo.employee(employeeID, employeeFirstName, employeeLastName)
-                 VALUES (?, ?, ?)"""
-
-        self.cursor.execute(sql, new_user_id, first_name, last_name)
+        self.cursor.execute(sql, first_name, last_name)
         self.conn.commit()
-        return User(first_name, last_name, new_user_id)
 
     def get_user(self, user_id):
         self.cursor.execute("SELECT * FROM SeniorDesign.dbo.employee WHERE employeeID = ?", user_id)
