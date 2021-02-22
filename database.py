@@ -2,7 +2,6 @@ import logging
 import pyodbc
 
 from datetime import datetime, timezone
-import logging
 from uuid import uuid4
 
 from classes import Resource, Unknown, User
@@ -47,11 +46,11 @@ class DBClient:
 
     def __enter__(self):
         self.conn = pyodbc.connect("""
-            Driver=Driver;
-            Server=Server_Name;
+            Driver={ODBC Driver 17 for SQL Server};
+            Server=127.0.0.1;
             Database=SeniorDesign;
-            UID=JoeBloggs;
-            PWD=Password123;
+            UID=<user_name>;
+            PWD=<password>;
         """)
 
         self.cursor = conn.cursor()
@@ -91,23 +90,6 @@ class DBClient:
             return True
 
     def log_access_attempt(self, users, resource_id, authorized):
-        # :param users          list of User objects
-        # :param resource_id    string representing the resource Id in the database
-        # :param authorized     True or False if all users are authorized
-        #
-        # Some general database ideas:
-        #
-        # ***** Access_log_table *****
-        # Access_Id (primary key)
-        # Time
-        # Authorized
-        # Resource_Id (foreign key to Resource table)
-        # Unknown_user_count (how many unrecognized faces were on screen)
-        #
-        # ***** User_access_attempt_table *****
-        # User_Id (foreign key to User table)
-        # Access_Id (foreign key to Access_log_table)
-        #
         unknown_user_count = len([user for user in users if user is Unknown])
         recognized_users = [user.id for user in users if user is not Unknown]
         logger.debug('-------- ACCESS ATTEMPT --------')
