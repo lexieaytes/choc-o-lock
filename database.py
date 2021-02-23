@@ -46,13 +46,13 @@ class DBClient:
     def __enter__(self):
         self.conn = pyodbc.connect("""
             Driver={ODBC Driver 17 for SQL Server};
-            Server=127.0.0.1;
+            Server=192.168.86.159;
             Database=SeniorDesign;
-            UID=<user_name>;
-            PWD=<password>;
+            UID=wonka;
+            PWD=wonka;
         """)
 
-        self.cursor = conn.cursor()
+        self.cursor = self.conn.cursor()
         return self
 
     def __exit__(self, type, value, traceback):
@@ -60,10 +60,13 @@ class DBClient:
 
     def add_user(self, first_name, last_name):
         sql = """INSERT INTO SeniorDesign.dbo.employee(employeeFirstName, employeeLastName)
+                 OUTPUT inserted.employeeID
                  VALUES (?, ?)"""
 
         self.cursor.execute(sql, first_name, last_name)
+        user_id = self.cursor.fetchval()
         self.conn.commit()
+        return User(first_name, last_name, user_id)
 
     def get_user(self, user_id):
         self.cursor.execute("SELECT * FROM SeniorDesign.dbo.employee WHERE employeeID = ?", user_id)
@@ -74,8 +77,8 @@ class DBClient:
             return User(row.first_name, row.last_name, row.id)
 
     def user_has_access_to_resource(self, user_id, resource_id):
-        sql = "SELECT userID FROM SeniorDesign.dbo.PermissionsServer(?) WHERE userID = ?"
-        self.cursor.execute(sql, resource_id, user_id)
+        sql = "SELECT * FROM SeniorDesign.dbo.Permissions WHERE user_id = ? AND resource_id = ?"
+        self.cursor.execute(sql, user_id, resource_id)
         row = self.cursor.fetchone()
         if row is None:
             return False  # record does not exist, so user does not have access
