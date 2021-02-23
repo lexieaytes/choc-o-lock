@@ -46,10 +46,10 @@ class DBClient:
     def __enter__(self):
         self.conn = pyodbc.connect("""
             Driver={ODBC Driver 17 for SQL Server};
-            Server=192.168.86.159;
+            Server=192.168.200.49;
             Database=SeniorDesign;
-            UID=wonka;
-            PWD=wonka;
+            UID=admin;
+            PWD=admin;
         """)
 
         self.cursor = self.conn.cursor()
