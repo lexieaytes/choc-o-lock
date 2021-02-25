@@ -1,5 +1,6 @@
 import logging
-import pyodbc
+import mysql.connector
+
 
 from datetime import datetime, timezone
 
@@ -37,22 +38,22 @@ mock_auth_table = [
 ]
 
 
+
 class DBClient:
 
     def __init__(self):
         self.conn = None
         self.cursor = None
 
+#You may have to change the host and user info depending on where the database is located.
     def __enter__(self):
-        self.conn = pyodbc.connect("""
-            Driver={ODBC Driver 17 for SQL Server};
-            Server=192.168.200.49;
-            Database=SeniorDesign;
-            UID=admin;
-            PWD=admin;
-        """)
+        self.conn = mysql.connector.connect(
+	    user='admin',
+	    password='admin',
+            host='192.168.200.49',
+            database='seniordesign',)
 
-        self.cursor = self.conn.cursor()
+        self.cursor = self.conn.cursor(buffered=True)
         return self
 
     def __exit__(self, type, value, traceback):
