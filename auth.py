@@ -1,8 +1,5 @@
-import logging
-
 from classes import Unknown
-
-logger = logging.getLogger('choco')
+from logger import logger
 
 
 def log_auth_attempt(timeout, auth_count, num_users):

@@ -1,10 +1,8 @@
 from datetime import datetime, timezone
-import logging
 from uuid import uuid4
 
 from classes import Resource, Unknown, User
-
-logger = logging.getLogger('choco')
+from logger import logger
 
 
 # *****************************

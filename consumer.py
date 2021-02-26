@@ -1,10 +1,7 @@
-import logging
-
 from kinesis.consumer import KinesisConsumer
 
 from classes import Unknown 
-
-logger = logging.getLogger('choco')
+from logger import logger
 
 
 def get_user_from_face(db, face):

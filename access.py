@@ -1,10 +1,8 @@
-import logging
 import time
 
 from auth import user_is_authorized
 from classes import Unknown
-
-logger = logging.getLogger('choco')
+from logger import logger
 
 
 class Timer:
