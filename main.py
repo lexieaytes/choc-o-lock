@@ -9,6 +9,7 @@ from consumer import *
 from database import *
 from lock import *
 from logger import logger
+from setup import already_setup, get_stream_name, setup
 
 TIMEOUT = 10
 AUTH_THRESHOLD = 4
@@ -46,8 +47,16 @@ def access_handler(db, kc, resource_id, users):
     print('Resource Closed')
 
 
-def main(resource_id, aws_stream_name):
-    print("Connecting to AWS...")
+def main(resource_id):
+    if not already_setup():
+        print('Running setup...')
+        setup()
+    else:
+        print('Already setup, skipping...')
+
+    aws_stream_name = get_stream_name()
+
+    print("Connecting to Kinesis Data Stream...")
 
     kc = Consumer(aws_stream_name)
 
@@ -60,12 +69,11 @@ def main(resource_id, aws_stream_name):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Choc-o-Lock Security System')
-    parser.add_argument('--resource-id', required=True, help='Id of the resource to protect')
-    parser.add_argument('--aws-stream', required=True, help='Name of the AWS Kinesis Video Stream to monitor')
+    parser.add_argument('--resource-id', required=True, help='ID of the resource (data center or server rack)')
     parser.add_argument('--debug', action='store_true', help='Run in DEBUG mode')
     args = parser.parse_args()
 
     if args.debug:
         logger.setLevel(logging.DEBUG)
 
-    main(args.resource_id, args.aws_stream)
+    main(args.resource_id)

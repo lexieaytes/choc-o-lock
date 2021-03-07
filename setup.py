@@ -25,6 +25,12 @@ def already_setup():
     return os.path.exists(_CONFIG_FILE)
 
 
+def get_stream_name():
+    with open(_CONFIG_FILE) as infile:
+        config = json.load(infile)
+    return config['KinesisData']['StreamName']
+
+
 def get_file_contents(path):
     with open(path) as infile:
         return infile.read()
