@@ -13,7 +13,7 @@ from setup import already_setup, get_stream_name, setup
 
 TIMEOUT = 10
 AUTH_THRESHOLD = 4
-TIME_UNTIL_UNATTENDED_ALERT = 10  # seconds
+TIME_UNTIL_UNATTENDED_ALERT = 10 
 UNKNOWN_USER_THRESHOLD = 6
 
 

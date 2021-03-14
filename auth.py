@@ -3,10 +3,10 @@ from logger import logger
 
 
 def log_auth_attempt(timeout, auth_count, num_users):
-    logger.debug('-----------------------------')
     logger.debug(f'Timeout: {timeout}')
     logger.debug(f'Auth count: {auth_count}')
     logger.debug(f'Num users: {num_users}')
+    logger.debug('-----------------------------')
 
 
 def user_is_authorized(db, user, resource_id):
