@@ -8,15 +8,30 @@
 To run the main Python application:
 
 ```
-python main.py --resource-id=<resource id> --aws-stream=<kinesis stream name> 
+python main.py --resource-id=<resource id>
 ```
 
-Or to run it in DEBUG mode:
+`<resource id>` should be the data center or server rack that this deployment protects.
+
+The first time you run the Python application, it will attempt to provision all the AWS resources required:
+- IAM role/policy
+- Rekognition collection
+- Kinesis Video Stream
+- Kinesis Data Stream
+- Rekognition stream processor
+
+You can also manually run setup like so:
 
 ```
-python main.py --resource-id=<resource id> --aws-stream=<kinesis stream name> --debug
+python setup.py
 ```
 
-`resource id` should identify the data center or server rack that this instance of the system is meant to protect. 
+Running setup will create a file called `config.json` in the project directory. This file contains all the identifiers for the AWS resources. 
 
-`kinesis stream name` should be the name of the Kinesis Data Stream to which AWS Rekognition writes its processed results.
+After you've run setup once, it will be skipped whenever you run the main application from then on.
+
+To run the main application in DEBUG mode:
+
+```
+python main.py --resource-id=<resource id> --debug
+```
