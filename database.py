@@ -97,10 +97,10 @@ class DBClient:
         logger.debug('--------------------------------')
 	
 	timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-	type = "Access_Attempt"
-	sql = """INSERT INTO access_event_log(type, time, resource_id, authorized, unknown_user_count)
+	typ = "Access_Attempt"
+	sql = """INSERT INTO access_event_log(typ, time, resource_id, authorized, unknown_user_count)
                  VALUES (?, ?, ?, ?, ?)"""
-        self.cursor.execute(sql, type, timestamp, resource_id, authorized, users)
+        self.cursor.execute(sql, typ, timestamp, resource_id, authorized, users)
 	event_id = self.cursor.fetchval()
 	sql1 = """INSERT INTO SeniorDesign.dbo.user_access_attempt(user_id, event_id)
                  VALUES (?, ?)"""
@@ -118,10 +118,10 @@ class DBClient:
         logger.debug('--------------------------------')
 
 	timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-	type = "Closed"
-	sql = """INSERT INTO access_event_log(type, time, resource_id, authorized, unknown_user_count)
+	typ = "Closed"
+	sql = """INSERT INTO access_event_log(typ, time, resource_id, authorized, unknown_user_count)
                  VALUES (?, ?, ?, ?, ?)"""
-        self.cursor.execute(sql, type, timestamp, resource_id, authorized, users)
+        self.cursor.execute(sql, typ, timestamp, resource_id, authorized, users)
 	event_id = self.cursor.fetchval()
 	sql1 = """INSERT INTO SeniorDesign.dbo.user_access_attempt(user_id, event_id)
                  VALUES (?, ?)"""
@@ -133,10 +133,10 @@ class DBClient:
         logger.warning(f'Resource Timed Out: {resource_id}')
 
 	timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-	type = "Timeout"
-	sql = """INSERT INTO access_event_log(type, time, resource_id, authorized, unknown_user_count)
+	typ = "Timeout"
+	sql = """INSERT INTO access_event_log(typ, time, resource_id, authorized, unknown_user_count)
                  VALUES (?, ?, ?, ?, ?)"""
-        self.cursor.execute(sql, type, timestamp, resource_id, authorized, users)
+        self.cursor.execute(sql, typ, timestamp, resource_id, authorized, users)
 	event_id = self.cursor.fetchval()
 	sql1 = """INSERT INTO SeniorDesign.dbo.user_access_attempt(user_id, event_id)
                  VALUES (?, ?)"""
@@ -151,10 +151,10 @@ class DBClient:
         logger.warning('--------------------------------')
 
 	timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-	type = "New_User"
-	sql = """INSERT INTO access_event_log(type, time, resource_id, authorized, unknown_user_count)
+	typ = "New_User"
+	sql = """INSERT INTO access_event_log(typ, time, resource_id, authorized, unknown_user_count)
                  VALUES (?, ?, ?, ?, ?)"""
-        self.cursor.execute(sql, type, timestamp, resource_id, authorized, users)
+        self.cursor.execute(sql, typ, timestamp, resource_id, authorized, users)
 	event_id = self.cursor.fetchval()
 	sql1 = """INSERT INTO user_access_attempt(user_id, event_id)
                  VALUES (?, ?)"""
@@ -168,10 +168,10 @@ class DBClient:
         logger.warning('-----------------------------------------')
 
 	timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-	type = "Unknown_User"
-	sql = """INSERT INTO access_event_log(type, time, resource_id, authorized, unknown_user_count)
+	typ = "Unknown_User"
+	sql = """INSERT INTO access_event_log(typ, time, resource_id, authorized, unknown_user_count)
                  VALUES (?, ?, ?, ?, ?)"""
-        self.cursor.execute(sql, type, timestamp, resource_id, authorized, users)
+        self.cursor.execute(sql, typ, timestamp, resource_id, authorized, users)
 	event_id = self.cursor.fetchval()
 	sql1 = """INSERT INTO user_access_attempt(user_id, event_id)
                  VALUES (?, ?)"""
