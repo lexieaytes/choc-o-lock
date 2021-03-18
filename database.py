@@ -60,7 +60,7 @@ class DBClient:
         self.conn.close()
 
     def add_user(self, first_name, last_name):
-        sql = """INSERT INTO SeniorDesign.dbo.employee(employeeFirstName, employeeLastName)
+        sql = """INSERT INTO employee(employeeFirstName, employeeLastName)
                  OUTPUT inserted.employeeID
                  VALUES (?, ?)"""
 
@@ -70,7 +70,7 @@ class DBClient:
         return User(first_name, last_name, user_id)
 
     def get_user(self, user_id):
-        self.cursor.execute("SELECT * FROM SeniorDesign.dbo.employee WHERE employeeID = %s", user_id)
+        self.cursor.execute("SELECT * FROM employee WHERE employeeID = '%s'", user_id)
         row = self.cursor.fetchone()
         if row is None:
             raise ValueError(f'User {user_id} does not exist in the database')
@@ -98,7 +98,7 @@ class DBClient:
 	
 	timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 	type = "Access_Attempt"
-	sql = """INSERT INTO SeniorDesign.dbo.access_event_log(type, time, resource_id, authorized, unknown_user_count)
+	sql = """INSERT INTO access_event_log(type, time, resource_id, authorized, unknown_user_count)
                  VALUES (?, ?, ?, ?, ?)"""
         self.cursor.execute(sql, type, timestamp, resource_id, authorized, users)
 	event_id = self.cursor.fetchval()
@@ -119,7 +119,7 @@ class DBClient:
 
 	timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 	type = "Closed"
-	sql = """INSERT INTO SeniorDesign.dbo.access_event_log(type, time, resource_id, authorized, unknown_user_count)
+	sql = """INSERT INTO access_event_log(type, time, resource_id, authorized, unknown_user_count)
                  VALUES (?, ?, ?, ?, ?)"""
         self.cursor.execute(sql, type, timestamp, resource_id, authorized, users)
 	event_id = self.cursor.fetchval()
@@ -134,7 +134,7 @@ class DBClient:
 
 	timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 	type = "Timeout"
-	sql = """INSERT INTO SeniorDesign.dbo.access_event_log(type, time, resource_id, authorized, unknown_user_count)
+	sql = """INSERT INTO access_event_log(type, time, resource_id, authorized, unknown_user_count)
                  VALUES (?, ?, ?, ?, ?)"""
         self.cursor.execute(sql, type, timestamp, resource_id, authorized, users)
 	event_id = self.cursor.fetchval()
@@ -152,11 +152,11 @@ class DBClient:
 
 	timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 	type = "New_User"
-	sql = """INSERT INTO SeniorDesign.dbo.access_event_log(type, time, resource_id, authorized, unknown_user_count)
+	sql = """INSERT INTO access_event_log(type, time, resource_id, authorized, unknown_user_count)
                  VALUES (?, ?, ?, ?, ?)"""
         self.cursor.execute(sql, type, timestamp, resource_id, authorized, users)
 	event_id = self.cursor.fetchval()
-	sql1 = """INSERT INTO SeniorDesign.dbo.user_access_attempt(user_id, event_id)
+	sql1 = """INSERT INTO user_access_attempt(user_id, event_id)
                  VALUES (?, ?)"""
 	self.cursor.execute(sql1, user_id, event_id)
         self.conn.commit()
@@ -169,11 +169,11 @@ class DBClient:
 
 	timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 	type = "Unknown_User"
-	sql = """INSERT INTO SeniorDesign.dbo.access_event_log(type, time, resource_id, authorized, unknown_user_count)
+	sql = """INSERT INTO access_event_log(type, time, resource_id, authorized, unknown_user_count)
                  VALUES (?, ?, ?, ?, ?)"""
         self.cursor.execute(sql, type, timestamp, resource_id, authorized, users)
 	event_id = self.cursor.fetchval()
-	sql1 = """INSERT INTO SeniorDesign.dbo.user_access_attempt(user_id, event_id)
+	sql1 = """INSERT INTO user_access_attempt(user_id, event_id)
                  VALUES (?, ?)"""
 	self.cursor.execute(sql1, user_id, event_id)
         self.conn.commit()
