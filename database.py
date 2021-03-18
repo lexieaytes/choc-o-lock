@@ -95,6 +95,19 @@ class DBClient:
         logger.debug(f'Unknown Users: {unknown_user_count}')
         logger.debug(f'Recognized Users: {" ".join(recognized_users)}')
         logger.debug('--------------------------------')
+	
+	timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+	type = "Access_Attempt"
+	user_id = self.cursor.fetchval()
+	sql = """INSERT INTO SeniorDesign.dbo.access_event_log(type, time, resource_id, authorized, unknown_user_count)
+                 VALUES (?, ?, ?, ?, ?)"""
+        self.cursor.execute(sql, type, timestamp, resource_id, authorized, users)
+	event_id = self.cursor.fetchval()
+	sql1 = """INSERT INTO SeniorDesign.dbo.user_access_attempt(user_id, event_id)
+                 VALUES (?, ?)"""
+	self.cursor.execute(sql1, user_id, event_id)
+        self.conn.commit()
+	
 
     def log_resource_close(self, users, resource_id):
         unknown_user_count = len([user for user in users if user is Unknown])
@@ -105,9 +118,33 @@ class DBClient:
         logger.debug(f'Recognized Users: {" ".join(recognized_users)}')
         logger.debug('--------------------------------')
 
+	timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+	type = "Closed"
+	user_id = self.cursor.fetchval()
+	sql = """INSERT INTO SeniorDesign.dbo.access_event_log(type, time, resource_id, authorized, unknown_user_count)
+                 VALUES (?, ?, ?, ?, ?)"""
+        self.cursor.execute(sql, type, timestamp, resource_id, authorized, users)
+	event_id = self.cursor.fetchval()
+	sql1 = """INSERT INTO SeniorDesign.dbo.user_access_attempt(user_id, event_id)
+                 VALUES (?, ?)"""
+	self.cursor.execute(sql1, user_id, event_id)
+        self.conn.commit()
+
     def log_resource_time_out(self, resource_id):
         logger.warning('!!! UNATTENDED ALERT !!!')
         logger.warning(f'Resource Timed Out: {resource_id}')
+
+	timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+	type = "Timeout"
+	sql = """INSERT INTO SeniorDesign.dbo.access_event_log(type, time, resource_id, authorized, unknown_user_count)
+                 VALUES (?, ?, ?, ?, ?)"""
+        self.cursor.execute(sql, type, timestamp, resource_id, authorized, users)
+	user_id = self.cursor.fetchval()
+	event_id = self.cursor.fetchval()
+	sql1 = """INSERT INTO SeniorDesign.dbo.user_access_attempt(user_id, event_id)
+                 VALUES (?, ?)"""
+	self.cursor.execute(sql1, user_id, event_id)
+        self.conn.commit()
 
     def log_new_user_appearance(self, user, resource_id, authorized):
         logger.warning('-------- NEW APPEARANCE --------')
@@ -116,8 +153,32 @@ class DBClient:
         logger.warning(f'Recognized User: {user.first_name} {user.last_name} {user.id}')
         logger.warning('--------------------------------')
 
+	timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+	type = "New_User"
+	sql = """INSERT INTO SeniorDesign.dbo.access_event_log(type, time, resource_id, authorized, unknown_user_count)
+                 VALUES (?, ?, ?, ?, ?)"""
+        self.cursor.execute(sql, type, timestamp, resource_id, authorized, users)
+	user_id = self.cursor.fetchval()
+	event_id = self.cursor.fetchval()
+	sql1 = """INSERT INTO SeniorDesign.dbo.user_access_attempt(user_id, event_id)
+                 VALUES (?, ?)"""
+	self.cursor.execute(sql1, user_id, event_id)
+        self.conn.commit()
+
     def log_unknown_user_appearance(self, num_unknown_users, resource_id):
         logger.warning('-------- UNKNOWN USER APPEARANCE --------')
         logger.warning(f'Resource Id: {resource_id}')
         logger.warning(f'Count: {num_unknown_users}')
         logger.warning('-----------------------------------------')
+
+	timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+	type = "Unknown_User"
+	user_id = self.cursor.fetchval()
+	sql = """INSERT INTO SeniorDesign.dbo.access_event_log(type, time, resource_id, authorized, unknown_user_count)
+                 VALUES (?, ?, ?, ?, ?)"""
+        self.cursor.execute(sql, type, timestamp, resource_id, authorized, users)
+	event_id = self.cursor.fetchval()
+	sql1 = """INSERT INTO SeniorDesign.dbo.user_access_attempt(user_id, event_id)
+                 VALUES (?, ?)"""
+	self.cursor.execute(sql1, user_id, event_id)
+        self.conn.commit()
