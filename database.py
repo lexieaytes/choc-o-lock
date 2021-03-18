@@ -70,8 +70,7 @@ class DBClient:
         return User(first_name, last_name, user_id)
 
     def get_user(self, user_id):
-        sql = """SELECT * FROM SeniorDesign.dbo.employee WHERE employeeID = %s"""
-	self.cursor.execute(sql, (user_id,))
+        self.cursor.execute("SELECT * FROM SeniorDesign.dbo.employee WHERE employeeID = %s", user_id)
         row = self.cursor.fetchone()
         if row is None:
             raise ValueError(f'User {user_id} does not exist in the database')
