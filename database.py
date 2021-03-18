@@ -87,7 +87,7 @@ class DBClient:
         else:
             return True
 
-    def log_access_attempt(self, users, resource_id, authorized):
+    def log_access_attempt(self, users, resource_id, authorized, user_id):
         unknown_user_count = len([user for user in users if user is Unknown])
         recognized_users = [user.id for user in users if user is not Unknown]
         logger.debug('-------- ACCESS ATTEMPT --------')
@@ -99,7 +99,6 @@ class DBClient:
 	
 	timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 	type = "Access_Attempt"
-	user_id = self.cursor.fetchval()
 	sql = """INSERT INTO SeniorDesign.dbo.access_event_log(type, time, resource_id, authorized, unknown_user_count)
                  VALUES (?, ?, ?, ?, ?)"""
         self.cursor.execute(sql, type, timestamp, resource_id, authorized, users)
@@ -110,7 +109,7 @@ class DBClient:
         self.conn.commit()
 	
 
-    def log_resource_close(self, users, resource_id):
+    def log_resource_close(self, users, resource_id, user_id):
         unknown_user_count = len([user for user in users if user is Unknown])
         recognized_users = [user.id for user in users if user is not Unknown]
         logger.debug('-------- RESOURCE CLOSED --------')
@@ -121,7 +120,6 @@ class DBClient:
 
 	timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 	type = "Closed"
-	user_id = self.cursor.fetchval()
 	sql = """INSERT INTO SeniorDesign.dbo.access_event_log(type, time, resource_id, authorized, unknown_user_count)
                  VALUES (?, ?, ?, ?, ?)"""
         self.cursor.execute(sql, type, timestamp, resource_id, authorized, users)
@@ -131,7 +129,7 @@ class DBClient:
 	self.cursor.execute(sql1, user_id, event_id)
         self.conn.commit()
 
-    def log_resource_time_out(self, resource_id):
+    def log_resource_time_out(self, resource_id, user_id):
         logger.warning('!!! UNATTENDED ALERT !!!')
         logger.warning(f'Resource Timed Out: {resource_id}')
 
@@ -140,14 +138,13 @@ class DBClient:
 	sql = """INSERT INTO SeniorDesign.dbo.access_event_log(type, time, resource_id, authorized, unknown_user_count)
                  VALUES (?, ?, ?, ?, ?)"""
         self.cursor.execute(sql, type, timestamp, resource_id, authorized, users)
-	user_id = self.cursor.fetchval()
 	event_id = self.cursor.fetchval()
 	sql1 = """INSERT INTO SeniorDesign.dbo.user_access_attempt(user_id, event_id)
                  VALUES (?, ?)"""
 	self.cursor.execute(sql1, user_id, event_id)
         self.conn.commit()
 
-    def log_new_user_appearance(self, user, resource_id, authorized):
+    def log_new_user_appearance(self, user, resource_id, authorized, user_id):
         logger.warning('-------- NEW APPEARANCE --------')
         logger.warning(f'Authorized: {authorized}')
         logger.warning(f'Resource Id: {resource_id}')
@@ -159,14 +156,13 @@ class DBClient:
 	sql = """INSERT INTO SeniorDesign.dbo.access_event_log(type, time, resource_id, authorized, unknown_user_count)
                  VALUES (?, ?, ?, ?, ?)"""
         self.cursor.execute(sql, type, timestamp, resource_id, authorized, users)
-	user_id = self.cursor.fetchval()
 	event_id = self.cursor.fetchval()
 	sql1 = """INSERT INTO SeniorDesign.dbo.user_access_attempt(user_id, event_id)
                  VALUES (?, ?)"""
 	self.cursor.execute(sql1, user_id, event_id)
         self.conn.commit()
 
-    def log_unknown_user_appearance(self, num_unknown_users, resource_id):
+    def log_unknown_user_appearance(self, num_unknown_users, resource_id, user_id):
         logger.warning('-------- UNKNOWN USER APPEARANCE --------')
         logger.warning(f'Resource Id: {resource_id}')
         logger.warning(f'Count: {num_unknown_users}')
@@ -174,7 +170,6 @@ class DBClient:
 
 	timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 	type = "Unknown_User"
-	user_id = self.cursor.fetchval()
 	sql = """INSERT INTO SeniorDesign.dbo.access_event_log(type, time, resource_id, authorized, unknown_user_count)
                  VALUES (?, ?, ?, ?, ?)"""
         self.cursor.execute(sql, type, timestamp, resource_id, authorized, users)
