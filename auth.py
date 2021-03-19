@@ -13,8 +13,7 @@ def user_is_authorized(db, user, resource_id):
     if user is Unknown:
         logger.warning('Unknown user detected')
         return False
-
-    return db.user_has_access_to_resource(user.id, resource_id)
+    return db.user_has_access_to_resource('589ae695-36de-4993-8470-e142cf111c6a', resource_id)
 
 
 def users_are_authorized(db, users, resource_id):

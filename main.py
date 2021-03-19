@@ -1,6 +1,8 @@
 import argparse
 import logging
 import os
+import RPi.GPIO as GPIO
+import time 
 
 from access import AccessToken
 from auth import AuthToken
@@ -15,6 +17,12 @@ TIMEOUT = 10
 AUTH_THRESHOLD = 4
 TIME_UNTIL_UNATTENDED_ALERT = 10 
 UNKNOWN_USER_THRESHOLD = 6
+
+#Set-up for push button
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(18, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
 
 
 def auth_handler(db, kc, resource_id):
@@ -42,29 +50,41 @@ def access_handler(db, kc, resource_id, users):
     while resource_is_unlocked():
         users = get_users_in_video(db, kc)
         token.check(users)
+        input_state = GPIO.input(18)
+        
+        #When user presses button after closing door
+        if input_state == False:
+            time.sleep(0.5)
+            break
+
 
     db.log_resource_close(users, resource_id)
     print('Resource Closed')
 
 
 def main(resource_id):
-    if not already_setup():
-        print('Running setup...')
-        setup()
-    else:
-        print('Already setup, skipping...')
+    while True:
+        #Recieving input from push button
+        input_state = GPIO.input(18)
+        if input_state == False: 
+            if not already_setup():
+                print('Running setup...') 
+                setup()
+            else:
+                print('Already setup, skipping...')
 
-    aws_stream_name = get_stream_name()
+            aws_stream_name = get_stream_name()
 
-    print("Connecting to Kinesis Data Stream...")
+            print("Connecting to Kinesis Data Stream...")
 
-    kc = Consumer(aws_stream_name)
+            kc = Consumer(aws_stream_name)
 
-    print('Connecting to database...')
+            print('Connecting to database...')
 
-    with DBClient() as db:
-        print("Attempting to authorize...")
-        auth_handler(db, kc, resource_id)
+            with DBClient() as db:
+                print("Attempting to authorize...")
+                auth_handler(db, kc, resource_id)
+            time.sleep(0.2)
 
 
 if __name__ == "__main__":
