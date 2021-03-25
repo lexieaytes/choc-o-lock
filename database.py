@@ -1,6 +1,6 @@
 import logging
 import mysql.connector
-
+import time
 
 from datetime import datetime, timezone
 
@@ -102,14 +102,20 @@ class DBClient:
         logger.debug('--------------------------------')
 	
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        
+        
         typ3 = "Access_Attempt"
         sql = """INSERT INTO access_event_log(time, resource_id)
                     VALUES (%s, %s)"""
-        self.cursor.execute(sql, (timestamp, resource_id,))
-        # event_id = self.cursor.fetchone()
-        # sql1 = """INSERT INTO SeniorDesign.dbo.user_access_attempt(user_id, event_id)
-        #             VALUES (?, ?)"""
-        # self.cursor.execute(sql1, (user_id, event_id, ))
+        self.conn.commit()
+        query = ("SELECT event_ID FROM access_event_log WHERE time = %s AND resource_ID = %s")
+        self.cursor.execute(query, (timestamp, resource_id,))
+        event_id = self.cursor.fetchone()
+        userid = ''.join(recognized_users)
+        sql1 = """INSERT INTO user_access_attempt(user_id, event_id)
+                     VALUES (%s, %s)"""
+        self.cursor.execute(sql1, (userid, event_id, ))
         self.conn.commit()
 	
 
@@ -123,15 +129,20 @@ class DBClient:
         logger.debug('--------------------------------')
 
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        
         typ3 = "Closed"
         sql = """INSERT INTO access_event_log(time, resource_id)
                      VALUES (%s, %s)"""
         self.cursor.execute(sql, (timestamp, resource_id,))
-        self.cursor.execute("SELECT event_ID FROM access_event_log WHERE time = %s AND resource_id = %s", (timestamp, resource_id,))
-        # event_id = self.cursor.fetchone()
-        # sql1 = """INSERT INTO user_access_attempt(user_id, event_id)
-        #          VALUES (?, ?)"""
-        # self.cursor.execute(sql1, (user_id, event_id, ))
+        self.conn.commit()
+        query = ("SELECT event_ID FROM access_event_log WHERE time = %s AND resource_ID = %s")
+        self.cursor.execute(query, (timestamp, resource_id,))
+        event_id = self.cursor.fetchone()
+        userid = ''.join(recognized_users)
+        sql1 = """INSERT INTO user_access_attempt(user_id, event_id)
+                     VALUES (%s, %s)"""
+        self.cursor.execute(sql1, (userid, event_id, ))
         self.conn.commit()
 
     def log_resource_time_out(self, resource_id):
@@ -139,15 +150,12 @@ class DBClient:
         logger.warning(f'Resource Timed Out: {resource_id}')
 
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        
         typ3 = "Timeout"
         sql = """INSERT INTO access_event_log(time, resource_id)
                      VALUES (%s, %s)"""
         self.cursor.execute(sql, (timestamp, resource_id,))
-        self.cursor.execute("SELECT event_ID FROM access_event_log WHERE time = %s AND resource_id = %s", (timestamp, resource_id,))
-        # event_id = self.cursor.fetchone()
-        # sql1 = """INSERT INTO user_access_attempt(user_id, event_id)
-        #          VALUES (?, ?)"""
-        # self.cursor.execute(sql1, (user_id, event_id, ))
         self.conn.commit()
 
     def log_new_user_appearance(self, user, resource_id, authorized):
@@ -157,15 +165,23 @@ class DBClient:
         logger.warning(f'Recognized User: {user.first_name} {user.last_name} {user.id}')
         logger.warning('--------------------------------')
 
+        use_ID = [user.id]
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
         typ3 = "New_User"
         sql = """INSERT INTO access_event_log(time, resource_id)
                      VALUES (%s, %s)"""
         self.cursor.execute(sql, (timestamp, resource_id,))
-        self.cursor.execute("SELECT event_ID FROM access_event_log WHERE time = %s AND resource_id = %s", (timestamp, resource_id,))
-        # sql1 = """INSERT INTO user_access_attempt(user_id, event_id)
-        #          VALUES (?, ?)"""
-        # self.cursor.execute(sql1, (user_id, event_id, ))
+        self.conn.commit()
+        query = ("SELECT event_ID FROM access_event_log WHERE time = %s AND resource_ID = %s")
+        self.cursor.execute(query, (timestamp, resource_id,))
+        event_id = self.cursor.fetchone()
+        userid = ''.join(use_ID)
+        event_id = event_id[0]
+        sql1 = """INSERT INTO user_access_attempt(user_id, event_id)
+                     VALUES (%s, %s)"""
+        
+        self.cursor.execute(sql1, (userid, event_id, ))
         self.conn.commit()
 
     def log_unknown_user_appearance(self, num_unknown_users, resource_id):
@@ -177,11 +193,6 @@ class DBClient:
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         typ3 = "Unknown_User"
         sql = """INSERT INTO access_event_log(time, resource_id)
-                    VALUES (%s, %s)"""
+                     VALUES (%s, %s)"""
         self.cursor.execute(sql, (timestamp, resource_id,))
-        self.cursor.execute("SELECT event_ID FROM access_event_log WHERE time = %s AND resource_id = %s", (timestamp, resource_id,))
-        # event_id = self.cursor.fetchone()
-        # sql1 = """INSERT INTO user_access_attempt(user_id, event_id)
-        #          VALUES (?, ?)"""
-        # self.cursor.execute(sql1, (user_id, event_id, ))
         self.conn.commit()

@@ -1,0 +1,23 @@
+{
+    "IAM": {
+        "RoleName": "choco-role-08d09560",
+        "PolicyName": "choco-permission-policy-08d09560",
+        "Arn": "arn:aws:iam::398532676078:role/choco-role-08d09560"
+    },
+    "Rekognition": {
+        "CollectionId": "choco-collection-08d09560",
+        "Arn": "aws:rekognition:us-west-2:398532676078:collection/choco-collection-08d09560"
+    },
+    "KinesisVideo": {
+        "StreamName": "choco-video-stream-08d09560",
+        "Arn": "arn:aws:kinesisvideo:us-west-2:398532676078:stream/choco-video-stream-08d09560/1615746910316"
+    },
+    "KinesisData": {
+        "StreamName": "choco-data-stream-08d09560",
+        "Arn": "arn:aws:kinesis:us-west-2:398532676078:stream/choco-data-stream-08d09560"
+    },
+    "StreamProcessor": {
+        "ProcName": "choco-proc-08d09560",
+        "Arn": "arn:aws:rekognition:us-west-2:398532676078:streamprocessor/choco-proc-08d09560"
+    }
+}
